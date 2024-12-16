@@ -9,7 +9,8 @@ from auto_bench.funs import *
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-def bench_func(model_name,eval_api,eval_model,bench_mark_path):
+def bench_func(model_name,eval_api = "groq",eval_model = "llama3-70b-8192",bench_mark_path = "./auto_bench/test.jsonl"):
+    result_list = []
     tokenizer_name = ""
 
     if tokenizer_name == "":
@@ -99,10 +100,16 @@ def bench_func(model_name,eval_api,eval_model,bench_mark_path):
                 ensure_ascii=False
             )
             f.write(json_str + "\n")
-
+        result_list.append(
+                {
+                    "input": data["input"],
+                    "output": local_LLM_answer,
+                    "eval_aspect": data["eval_aspect"],
+                    "score": res
+                },
+        )
         score.append(int(res))
 
-    models_score = sum(score) / len(score)
 
-    print(models_score)
-    return models_score
+    models_score = sum(score) / len(score)
+    return models_score, result_list
